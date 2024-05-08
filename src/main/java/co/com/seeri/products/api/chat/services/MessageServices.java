@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface MessageServices {
 
-    MessageDTO addMessageToConversation(Long conversationId, MessageDTO messagesDTO);
+    MessageDTO addMessageToConversation(Long conversationId, MessageDTO messagesDTO) throws Exception;
 
     Page<Message> getAllMessages(Pageable pageable, Long conversationId);
 

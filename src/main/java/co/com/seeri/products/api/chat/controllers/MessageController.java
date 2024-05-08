@@ -11,9 +11,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.logging.Logger;
+
 @RestController
 @RequestMapping("/messages")
 public class MessageController {
+
+    private final static Logger logger = Logger.getLogger(MessageController.class.getName());
 
 
     private final MessageServices messageService;
@@ -23,22 +27,34 @@ public class MessageController {
         this.messageService = messageService;
     }
 
-    @PostMapping("/{conversationId}")
+    @PostMapping("/addMessageToConversation/{conversationId}")
     @Operation(summary = "add message to conversations")
-    public ResponseEntity<MessageDTO> addMessageToConversation(@PathVariable Long conversationId, @RequestBody MessageDTO messagesDTO) {
+    public ResponseEntity<MessageDTO> addMessageToConversation(@PathVariable Long conversationId, @RequestBody MessageDTO messagesDTO) throws Exception {
 
-        MessageDTO dto = messageService.addMessageToConversation(conversationId, messagesDTO);
-        if (dto != null) {
-            return ResponseEntity.status(HttpStatus.CREATED).body(dto);
-        } else {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        try {
+            MessageDTO dto = messageService.addMessageToConversation(conversationId, messagesDTO);
+            if (dto != null) {
+                logger.info("Message added to conversation: " + dto);
+                return ResponseEntity.status(HttpStatus.CREATED).body(dto);
+            }
+        } catch (Exception e) {
+            logger.info(e.getMessage());
         }
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+
     }
 
-    @GetMapping("/{conversationId}")
+    @GetMapping("/getMessagesFromConversation/{conversationId}")
     @Operation(summary = "get messages")
-    public Page<Message> getMessages(@PathVariable Long conversationId, Pageable pageable) {
-        return this.messageService.getAllMessages(pageable, conversationId);
+    public ResponseEntity<Page<Message>> getMessages(@PathVariable Long conversationId, Pageable pageable) {
+        Page<Message> messagePage = messageService.getAllMessages(pageable, conversationId);
+        if (messagePage.getContent().isEmpty()) {
+            logger.info("No messages found for conversation: " + conversationId);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        } else {
+            return ResponseEntity.status(HttpStatus.OK).body(messagePage);
+        }
     }
 
 

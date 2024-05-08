@@ -60,7 +60,7 @@ public class ConversationServicesImpl implements ConversationServices {
             return dtos;
         }
 
-        return null;
+        return new ArrayList<>();
     }
 
     @Override

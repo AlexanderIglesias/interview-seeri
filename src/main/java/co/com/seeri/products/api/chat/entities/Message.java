@@ -14,7 +14,6 @@ public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long userId;
     private String text;
     private String multimediaUrl;
     @ManyToOne
